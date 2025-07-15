@@ -113,23 +113,27 @@ class _MyAppState extends State<MyApp> {
 }
 
 class MainPage extends StatelessWidget {
-  const MainPage({Object? data, Key? key}) : super(key: key);
+  String? data;
+
+  MainPage({this.data, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Main Page')),
+    return Scaffold(
+      body: Center(child: Text('Main Page:${data}')),
     );
   }
 }
 
 class SimplePage extends StatelessWidget {
-  const SimplePage({Object? data, Key? key}) : super(key: key);
+  String? data;
+
+  SimplePage({this.data, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('SimplePage')),
+    return Scaffold(
+      body: Center(child: Text('Simple Page:${data}')),
     );
   }
 }
