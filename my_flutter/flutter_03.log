@@ -1,0 +1,96 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter --no-color attach --machine --device-id=588b2ec409b6089d6b336de484f346d6ac9692df lib/main.dart
+
+## exception
+
+SocketException: SocketException: Send failed (OS Error: No route to host, errno = 65), address = 0.0.0.0, port = 5353
+
+```
+#0      _NativeSocket.send (dart:io-patch/socket_patch.dart:1213:34)
+#1      _RawDatagramSocket.send (dart:io-patch/socket_patch.dart:2450:15)
+#2      MDnsClient.lookup (package:multicast_dns/multicast_dns.dart:225:14)
+#3      MDnsObservatoryDiscovery.query (package:flutter_tools/src/mdns_discovery.dart:65:10)
+<asynchronous suspension>
+#4      MDnsObservatoryDiscovery.getObservatoryUri (package:flutter_tools/src/mdns_discovery.dart:153:52)
+<asynchronous suspension>
+#5      AttachCommand._attachToDevice (package:flutter_tools/src/commands/attach.dart:277:11)
+<asynchronous suspension>
+#6      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:150:19)
+<asynchronous suspension>
+#7      AttachCommand.runCommand (package:flutter_tools/src/commands/attach.dart:224:5)
+<asynchronous suspension>
+#8      FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1183:27)
+<asynchronous suspension>
+#9      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:150:19)
+<asynchronous suspension>
+#10     CommandRunner.runCommand (package:args/command_runner.dart:209:13)
+<asynchronous suspension>
+#11     FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:281:9)
+<asynchronous suspension>
+#12     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:150:19)
+<asynchronous suspension>
+#13     FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:229:5)
+<asynchronous suspension>
+#14     run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:62:9)
+<asynchronous suspension>
+#15     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:150:19)
+<asynchronous suspension>
+#16     main (package:flutter_tools/executable.dart:94:3)
+<asynchronous suspension>
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel unknown, 3.0.5, on macOS 15.2 24C101 darwin-arm, locale zh-Hans-CN)
+    • Flutter version 3.0.5 at /opt/fvm/versions/3.0.5
+    • Upstream repository unknown
+    • Framework revision f1875d570e (3 years ago), 2022-07-13 11:24:16 -0700
+    • Engine revision e85ea0e79c
+    • Dart version 2.17.6
+    • DevTools version 2.12.2
+    • Pub download mirror https://pub.flutter-io.cn
+    • Flutter download mirror https://storage.flutter-io.cn
+
+[✗] Android toolchain - develop for Android devices
+    • Android SDK at /Users/huchu/Library/Android/sdk
+    ✗ cmdline-tools component is missing
+      Run `path/to/sdkmanager --install "cmdline-tools;latest"`
+      See https://developer.android.com/studio/command-line for more details.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 16.2)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • CocoaPods version 1.15.2
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[!] Android Studio (version 2024.2)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    ✗ Unable to find bundled Java version.
+    • Try updating or re-installing Android Studio.
+
+[✓] VS Code (version 1.101.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.110.0
+
+[✓] Connected device (5 available)
+    • huchu (mobile)                  • 00008101-001175A23A12001E                • ios            • iOS 17.3.1 21D61
+    • iPhone (2) (mobile)             • 588b2ec409b6089d6b336de484f346d6ac9692df • ios            • iOS 14.4.2 18D70
+    • macOS (desktop)                 • macos                                    • darwin-arm64   • macOS 15.2 24C101 darwin-arm
+    • Mac Designed for iPad (desktop) • designed-for-ipad                        • darwin         • macOS 15.2 24C101 darwin-arm
+    • Chrome (web)                    • chrome                                   • web-javascript • Google Chrome 138.0.7204.101
+
+[✓] HTTP Host Availability
+    • All required HTTP hosts are available
+
+! Doctor found issues in 2 categories.
+```
