@@ -1,0 +1,98 @@
+# Uncomment the next line to define a global platform for your project
+ platform :ios, '12.0'
+
+install! 'cocoapods', disable_input_output_paths: true
+
+#flutter_application_path = '../my_flutter'
+#load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+#
+
+def load_workflow_podhelper(path, tag = nil)
+  
+  
+  if path.start_with?('git') || path.start_with?('http')
+    unless tag
+      puts('远端依赖必须指定branch或tag ! ')
+      return
+    end
+    workflow_dir = 'Pods/workFlow_temp'
+    git_path = "git clone -b #{tag} --depth 1 #{path} #{workflow_dir}"
+    puts "-----> #{git_path}"
+    system "rm -rf #{workflow_dir}"
+    system "mkdir -p #{workflow_dir}"
+    system git_path
+ 
+    system "cd #{workflow_dir};rm -rf .git"
+    path = workflow_dir.to_s
+  end
+  load File.join(path, 'podhelper.rb')
+end
+
+
+
+
+
+target 'ios_flutter_app' do
+ 
+ 
+ # use_frameworks! # 相当于每个 Pod 会生成一个 .framework，使用动态库的方式链接进主工程。
+ 
+ 
+# 而 use_frameworks! :linkage => :static 强制使用静态库
+# Pods 仍然以 Framework 形式集成（Swift 兼容性所需），但链接方式是 静态 的
+# 不会生成 .framework 动态库，而是将代码和资源打包进主应用中
+
+  use_frameworks! linkage: :static
+
+	
+
+
+#	install_all_flutter_pods(flutter_application_path)
+
+
+  ENV['build_mode'] = 'debug'
+  devPath = '../my_flutter/.build_ios'
+  flutterApp = 'framework/Debug/App.xcframework'
+  
+   if File.directory?(File.join(devPath, flutterApp))
+     puts '优先从flutter源码工程读取'
+     load_workflow_podhelper(devPath)
+     
+   elsif File.directory?(File.join('./Pods/workFlow_temp', flutterApp))
+     puts '从上次下载的仓库读取'
+     load_workflow_podhelper('./Pods/workFlow_temp')
+   else
+    puts '从远端仓库拉取'
+    load_workflow_podhelper('git@igit.58corp.com:flutter_build_ios/flutter_commercial_build_ios_2.2.2.git',
+                            getBranchByPrj('flutter_commercial_build_ios').to_s)
+   end
+
+  install_all_flutter_pods
+
+
+end
+
+
+
+
+
+
+post_install do |installer|
+  flutter_post_install(installer) if defined?(flutter_post_install)
+  
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |configuration|
+      configuration.build_settings['CLANG_WARN_DOCUMENTATION_COMMENTS'] = 'NO'
+      configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+      configuration.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+      
+      configuration.build_settings['ARCHS'] = '$(ARCHS_STANDARD)'
+      
+      
+    end
+    
+  end
+  
+  
+end

@@ -1,0 +1,6 @@
+framework module Pods_ios_flutter_app {
+  umbrella header "Pods-ios_flutter_app-umbrella.h"
+
+  export *
+  module * { export * }
+}
