@@ -20,7 +20,7 @@ class ViewController: UIViewController {
     @IBAction func openMainPageVc(_ sender: Any) {
         let options = FlutterBoostRouteOptions()
         options.pageName = "mainPage"
-        options.arguments = ["key" :"value"]
+        options.arguments = ["data" :"mainPage"]
  
         //页面是否透明（用于透明弹窗场景），若不设置，默认情况下为true
         options.opaque = true
@@ -44,7 +44,7 @@ class ViewController: UIViewController {
         
         let options = FlutterBoostRouteOptions()
         options.pageName = "simplePage"
-        options.arguments = ["key" :"value"]
+        options.arguments = ["data" :"simplePage"]
 
         //页面是否透明（用于透明弹窗场景），若不设置，默认情况下为true
         options.opaque = true
