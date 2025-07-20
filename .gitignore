@@ -26,6 +26,7 @@ build/
 **/ios/Pods/
 **/ios/Podfile.lock
 **/.xcuserstate
+ios_flutter_app/Pods/
 
 
 
