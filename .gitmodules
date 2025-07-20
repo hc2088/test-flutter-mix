@@ -1,0 +1,3 @@
+[submodule "fx-wallet-packages"]
+	path = fx-wallet-packages
+	url = https://github.com/fxwalletOfficial/fx-wallet-packages.git
