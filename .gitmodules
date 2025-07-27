@@ -1,3 +1,6 @@
 [submodule "submodules/fx-wallet-packages"]
 	path = submodules/fx-wallet-packages
 	url = https://github.com/fxwalletOfficial/fx-wallet-packages.git
+[submodule "submodules/flutter_boost"]
+	path = submodules/flutter_boost
+	url = https://github.com/alibaba/flutter_boost.git
