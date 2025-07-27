@@ -36,53 +36,56 @@ target 'Runner' do
   flutter_install_all_ios_pods(__dir__)
 
   pod 'FlutterPluginRegistrant', path: File.join('Flutter', 'FlutterPluginRegistrant'), inhibit_warnings: true
+
+
+  post_install do |installer|
+    puts "🍎 post_install 开始执行"
+
+    # 1. 查找 bitcode_strip 工具路径
+    bitcode_strip_path = `xcrun --find bitcode_strip`.chomp
+    puts "bitcode_strip_path = #{bitcode_strip_path}"
+
+    # 2. 定义工具函数
+    def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+      framework_path = File.join(File.dirname(__FILE__), framework_relative_path)
+      unless File.exist?(framework_path)
+        puts "❌ Framework not found: #{framework_path}"
+        return
+      end
+      command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+      puts "🧹 Stripping bitcode: #{command}"
+
+      success = system(command)
+      puts success ? "✅ Done." : "⚠️ Failed to strip bitcode"
+    end
+
+    # 3. 指定需要处理的 framework 二进制路径
+    framework_paths = [
+      "Pods/xx/xxx/xx.framework/xx"
+      # 可追加更多路径
+    ]
+
+    # 4. 执行 strip 操作
+    framework_paths.each do |framework_relative_path|
+      strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    end
+
+    # 5. 修改 build 设置
+    installer.pods_project.targets.each do |target|
+      puts "🔧 设置构建参数: #{target.name}"
+
+      flutter_additional_ios_build_settings(target)
+
+      target.build_configurations.each do |config|
+        puts "  ⚙️ 配置 #{config.name}"
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+        config.build_settings['ENABLE_BITCODE'] = 'NO'
+      end
+    end
+
+    puts "✅ post_install 执行完毕"
+  end
+  
 end
 
-post_install do |installer|
-  puts "🍎 post_install 开始执行"
-
-  # 1. 查找 bitcode_strip 工具路径
-  bitcode_strip_path = `xcrun --find bitcode_strip`.chomp
-  puts "bitcode_strip_path = #{bitcode_strip_path}"
-
-  # 2. 定义工具函数
-  def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
-    framework_path = File.join(File.dirname(__FILE__), framework_relative_path)
-    unless File.exist?(framework_path)
-      puts "❌ Framework not found: #{framework_path}"
-      return
-    end
-    command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
-    puts "🧹 Stripping bitcode: #{command}"
-
-    success = system(command)
-    puts success ? "✅ Done." : "⚠️ Failed to strip bitcode"
-  end
-
-  # 3. 指定需要处理的 framework 二进制路径
-  framework_paths = [
-    "Pods/xx/xxx/xx.framework/xx"
-    # 可追加更多路径
-  ]
-
-  # 4. 执行 strip 操作
-  framework_paths.each do |framework_relative_path|
-    strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
-  end
-
-  # 5. 修改 build 设置
-  installer.pods_project.targets.each do |target|
-    puts "🔧 设置构建参数: #{target.name}"
-
-    flutter_additional_ios_build_settings(target)
-
-    target.build_configurations.each do |config|
-      puts "  ⚙️ 配置 #{config.name}"
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-      config.build_settings['ENABLE_BITCODE'] = 'NO'
-    end
-  end
-
-  puts "✅ post_install 执行完毕"
-end

@@ -74,8 +74,8 @@ cd "$WORKSPACE"
 
 echo "🧹 清理 Flutter 缓存..."
 rm -rf .ios
-#flutter clean
-#rm -rf pubspec.lock
+flutter clean
+rm -rf pubspec.lock
 flutter pub get
 
 # === 修改 xcconfig（构建成功后） ===

@@ -35,64 +35,69 @@ end
 target 'ios_flutter_app' do
  
  
- # use_frameworks! # 相当于每个 Pod 会生成一个 .framework，使用动态库的方式链接进主工程。
+  use_frameworks! # 相当于每个 Pod 会生成一个 .framework，使用动态库的方式链接进主工程。
  
  
 # 而 use_frameworks! :linkage => :static 强制使用静态库
 # Pods 仍然以 Framework 形式集成（Swift 兼容性所需），但链接方式是 静态 的
 # 不会生成 .framework 动态库，而是将代码和资源打包进主应用中
 
-  use_frameworks! linkage: :static
+#  use_frameworks! linkage: :static
 
 	
 
 
 #	install_all_flutter_pods(flutter_application_path)
 
-
-  ENV['build_mode'] = 'release'
-  devPath = '../my_flutter/.build_ios'
-  flutterApp = 'framework/Debug/App.xcframework'
+  ENV['build_mode'] = 'debug'
   
-   if File.directory?(File.join(devPath, flutterApp))
+  build_mode = ENV['build_mode'] || 'debug'  # 默认 debug
+  puts "🚩 当前 build_mode 是：#{build_mode.upcase}"
+
+
+
+  devPath = '../my_flutter/.build_ios'
+#  flutterApp = 'framework/Debug/App.xcframework'
+  
+#   if File.directory?(File.join(devPath, flutterApp))
      puts '优先从flutter源码工程读取'
      load_workflow_podhelper(devPath)
      
-   elsif File.directory?(File.join('./Pods/workFlow_temp', flutterApp))
-     puts '从上次下载的仓库读取'
-     load_workflow_podhelper('./Pods/workFlow_temp')
-   else
-    puts '从远端仓库拉取'
-    load_workflow_podhelper('git@igit.58corp.com:flutter_build_ios/flutter_commercial_build_ios_2.2.2.git',
-                            getBranchByPrj('flutter_commercial_build_ios').to_s)
-   end
+#   elsif File.directory?(File.join('./Pods/workFlow_temp', flutterApp))
+#     puts '从上次下载的仓库读取'
+#     load_workflow_podhelper('./Pods/workFlow_temp')
+#   else
+#    puts '从远端仓库拉取'
+#    load_workflow_podhelper('git@igit.58corp.com:flutter_build_ios/flutter_commercial_build_ios_2.2.2.git',
+#                            getBranchByPrj('flutter_commercial_build_ios').to_s)
+#   end
 
   install_all_flutter_pods
 
 
-end
-
-
-
-
-
-
-post_install do |installer|
-  flutter_post_install(installer) if defined?(flutter_post_install)
-  
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |configuration|
-      configuration.build_settings['CLANG_WARN_DOCUMENTATION_COMMENTS'] = 'NO'
-      configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-      configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-      configuration.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
-      
-      configuration.build_settings['ARCHS'] = '$(ARCHS_STANDARD)'
-      
+  post_install do |installer|
+    flutter_post_install(installer) if defined?(flutter_post_install)
+    
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |configuration|
+        configuration.build_settings['CLANG_WARN_DOCUMENTATION_COMMENTS'] = 'NO'
+        configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = ''
+        configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+        configuration.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        
+        configuration.build_settings['ARCHS'] = '$(ARCHS_STANDARD)'
+        
+        
+      end
       
     end
     
+    
   end
-  
-  
+
 end
+
+
+
+
+

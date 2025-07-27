@@ -23,10 +23,12 @@
     
     //创建代理，做初始化操作
     BoostDelegate *delegate = [[BoostDelegate alloc] init];
-    [[FlutterBoost instance] setup:application delegate:delegate callback:^(FlutterEngine *engine) {
-
+    
+ 
+    
+    [[FlutterBoost instance] setup:application delegate:delegate  callback:^(FlutterEngine *engine) {
         
-    }];
+    } options:nil];
     // 创建 UIWindow 并设置 rootViewController 为 storyboard 里的初始控制器
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     UIViewController *initialViewController = [storyboard instantiateInitialViewController];

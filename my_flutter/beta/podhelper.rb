@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'json'
 
 def install_all_flutter_pods
@@ -14,13 +12,18 @@ def install_flutter_engine_pod
   fdebug = 'framework/Debug/Flutter.podspec'
   frelease = 'framework/Release/Flutter.podspec'
 
-  engine_dir = Pathname.new File.expand_path(ENV['build_mode'] == 'debug' ? fdebug : frelease, current_directory)
+  build_mode = ENV['build_mode'] || 'debug'
+  puts "[FlutterEnginePod] 当前 build_mode=#{build_mode}"
+
+  selected_podspec = build_mode == 'debug' ? fdebug : frelease
+  puts "[FlutterEnginePod] 选择的 Flutter podspec 路径是：#{selected_podspec}"
+
+  engine_dir = Pathname.new File.expand_path(selected_podspec, current_directory)
 
   relative = engine_dir.relative_path_from defined_in_file.dirname
-  
-  puts "relative is " + relative.to_s
+  puts "[FlutterEnginePod] relative path: #{relative}"
 
-  pod 'Flutter', podspec: relative.to_s, inhibit_warnings: true
+  pod 'Flutter', podspec: relative.to_s, inhibit_warnings: true, modular_headers: true
 end
 
 def install_flutter_plugin_pods
@@ -31,6 +34,8 @@ def install_flutter_plugin_pods
 
   plugin_pods = flutter_parse_dependencies_file_for_ios_plugin(plugins_file)
 
+  puts "[FlutterPluginPods] 发现插件数量：#{plugin_pods.size}"
+
   plugin_pods.each do |plugin_hash|
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
@@ -40,7 +45,7 @@ def install_flutter_plugin_pods
     symlink = Pathname.new File.join(symlinks_dir, plugin_name, 'ios')
 
     relative = symlink.relative_path_from defined_in_file.dirname
-    puts relative
+    puts "[FlutterPluginPods] 插件: #{plugin_name}, relative path: #{relative}"
 
     pod plugin_name, path: relative.to_s, inhibit_warnings: true
   end
@@ -48,7 +53,7 @@ def install_flutter_plugin_pods
   flutterPluginRegistrantpath = Pathname.new File.join(current_directory, 'FlutterPluginRegistrant')
   relative = flutterPluginRegistrantpath.relative_path_from defined_in_file.dirname
 
-  puts "relative is " + relative.to_s
+  puts "[FlutterPluginPods] FlutterPluginRegistrant relative path: #{relative}"
 
   pod 'FlutterPluginRegistrant', path: relative.to_s, inhibit_warnings: true
 end
@@ -60,20 +65,27 @@ def install_flutter_application_pod
 
   relative = current_directory_pathname.relative_path_from project_directory_pathname
 
-  puts "relative is " + relative.to_s
+  puts "[FlutterAppPod] relative path: #{relative}"
 
   pod 'TestFlutterModule', path: relative.to_s, inhibit_warnings: true
 end
 
 def flutter_parse_dependencies_file_for_ios_plugin(file)
   file_path = File.expand_path(file)
-  return [] unless File.exist? file_path
+  unless File.exist?(file_path)
+    puts "[FlutterPluginDeps] 文件不存在: #{file_path}"
+    return []
+  end
 
   dependencies_file = File.read(file)
   dependencies_hash = JSON.parse(dependencies_file)
 
-  return [] unless dependencies_hash.key?('plugins')
-  return [] unless dependencies_hash['plugins'].key?('ios')
+  unless dependencies_hash.key?('plugins') && dependencies_hash['plugins'].key?('ios')
+    puts "[FlutterPluginDeps] 文件格式不符合预期或无 iOS 插件"
+    return []
+  end
 
-  dependencies_hash['plugins']['ios'] || []
+  plugins = dependencies_hash['plugins']['ios'] || []
+  puts "[FlutterPluginDeps] 解析到 #{plugins.size} 个 iOS 插件"
+  plugins
 end

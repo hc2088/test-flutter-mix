@@ -8,26 +8,27 @@
 build/
 
 # Android 相关
-**/android/**/gradle-wrapper.jar
-**/android/.gradle/
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/local.properties
-**/android/**/GeneratedPluginRegistrant.java
+android/gradle-wrapper.jar
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/GeneratedPluginRegistrant.java
 
 # iOS 相关
-**/ios/Flutter/.last_build_id
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/App.framework
-**/ios/Flutter/ephemeral/
-**/ios/.symlinks/
-**/ios/Pods/
-**/ios/Podfile.lock
-**/.xcuserstate
+ios/Flutter/.last_build_id
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/ephemeral/
+ios/.symlinks/
+ios/Pods/
+ios/Podfile.lock
+.xcuserstate
 ios_flutter_app/Pods/
-
+xcshareddata
+xcuserdata
 
 
 
@@ -45,3 +46,4 @@ ios_flutter_app/Pods/
 *.DS_Store
 
 
+.build_ios/
