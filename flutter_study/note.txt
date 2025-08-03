@@ -1,0 +1,77 @@
+    Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
+    if (newWidget == null) {
+      if (child != null) {
+        deactivateChild(child);
+      }
+      return null;
+    }
+
+    final Element newChild;
+    if (child != null) {
+      bool hasSameSuperclass = true;
+      
+   
+      if (hasSameSuperclass && child.widget == newWidget) {//同一个widget， widget没变，例如const修饰的widget
+        if (child.slot != newSlot) {
+          updateSlotForChild(child, newSlot);
+        }
+
+        newChild = child;
+      } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {//key相同，复用element 及其element.state
+          if (child.slot != newSlot) {
+            updateSlotForChild(child, newSlot);
+          }
+
+ 
+          
+        child.update(newWidget);//如果是statefullelement，将调用对应的state.didUpdateWidget(oldWidget)
+        //所以这里注意的用法就是 build widget statefullwidget类型widget构造时传递的参数给到widget，在state到build方法里面如果在initState时结收了widget.xx，而不是build方法中用widget.xx，而使用state.xx，那么这是后就没更新，需要在didUpdateWidget对state.xx重新赋值
+      
+  
+        newChild = child;
+      } else {//key不同、或者
+        //我们hot reload时，把一个StatelessWidget改成了StateFullWidget，类名没有改，父类改了
+        //这时候runtimeType是相等的，但是应该被当作不同widget，所以不能仅用类名来判断
+        deactivateChild(child);
+ 
+        newChild = inflateWidget(newWidget, newSlot);
+      }
+    } else {
+     
+      newChild = inflateWidget(newWidget, newSlot);
+    }
+ 
+
+    return newChild;
+  }
+
+
+  Element inflateWidget(Widget newWidget, Object? newSlot) {
+ 
+    try {
+      final Key? key = newWidget.key;
+      if (key is GlobalKey) {//如果是globalkey类型的key， 复用element，（允许跨组件树）组件需要 状态保留 或 跨树移动
+        final Element? newChild = _retakeInactiveElement(key, newWidget);
+        if (newChild != null) {
+  
+          try {
+            newChild._activateWithParent(this, newSlot);
+          } catch (_) {
+           
+          }
+          final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
+ 
+          return updatedChild!;
+        }
+      }
+      final Element newChild = newWidget.createElement();//创建新的 element
+     
+      newChild.mount(this, newSlot);
+  
+      return newChild;
+    } finally {
+ 
+    }
+  }
+
+

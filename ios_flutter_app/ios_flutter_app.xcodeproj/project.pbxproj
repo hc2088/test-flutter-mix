@@ -219,6 +219,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ios_flutter_app/Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Flutter 调试需要访问本地网络以启用热重载和 DevTools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -254,6 +255,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ios_flutter_app/Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Flutter 调试需要访问本地网络以启用热重载和 DevTools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

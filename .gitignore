@@ -6,6 +6,8 @@
 .pub-cache/
 .pub/
 build/
+.last_build_id
+.build_ios/
 
 # Android 相关
 android/gradle-wrapper.jar
@@ -15,6 +17,10 @@ android/gradlew
 android/gradlew.bat
 android/local.properties
 android/GeneratedPluginRegistrant.java
+android/app/debug
+android/app/profile
+android/app/release
+
 
 # iOS 相关
 ios/Flutter/.last_build_id
@@ -31,19 +37,30 @@ xcshareddata
 xcuserdata
 
 
-
 # IDE 配置文件
 .idea/
 .vscode/
 *.iml
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+*.ipr
+*.iws
+.idea/
 
 # 其他
 *.log
 *.lock
 *.tmp
 *.swp
-*.swo
 *.DS_Store
+*.class
+*.log
+*.pyc
+app.*.symbols
+app.*.map.json
 
 
-.build_ios/
+
