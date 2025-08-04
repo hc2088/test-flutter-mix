@@ -1,0 +1,6 @@
+framework module FFIDynamicFlutter {
+  umbrella header "FFIDynamicFlutter.h"
+  export *
+
+  module * { export * }
+}

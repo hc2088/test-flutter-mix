@@ -8,9 +8,11 @@ import 'test_value_notifier_2.dart' as test5;
 import 'test_list.dart' as test6;
 import 'test_list_valuekey.dart' as test7;
 import 'test_list_valuekey_drag.dart' as test8;
+import 'test_layout.dart' as test9;
+import 'test_stream_future.dart' as test10;
+import 'test_stream_controller.dart' as test11;
 
-void main() => runApp(test1.MyApp());
-
+// void main() => runApp(test1.MyApp());
 // void main() => test2.main();
 // void main() => test3.main();
 // void main() => test4.main();
@@ -18,3 +20,6 @@ void main() => runApp(test1.MyApp());
 // void main() => test6.main();
 // void main() => test7.main();
 // void main() => test8.main();
+// void main() => test9.main();
+void main() => test10.main();
+// void main() => test11.main();
