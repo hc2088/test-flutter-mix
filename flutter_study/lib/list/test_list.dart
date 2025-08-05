@@ -36,13 +36,14 @@ class _ListPageState extends State<ListPage> {
         itemBuilder: (context, index) {
           return ListItemWidget(
             // 不要valuekey 依然能看起来正常更新
-            key: ValueKey(index), // 保证唯一性，避免复用冲突
+            key: ValueKey(index),
+            // 保证唯一性，避免复用冲突
 
-          //     没有指定 key 时，Flutter 会**根据 widget 的类型和位置（slot）**来匹配旧 widget 和新 widget。
-          //
-          // 在 ListView.builder 中，若你修改了某个列表项的内容并 setState，位置不变时大概率会复用成功，所以看起来没问题。
-          //
-          // 但当列表项的顺序变动、插入、删除时，没有 Key 的复用机制就会发生错位更新、错乱 UI、状态泄露等问题。
+            //     没有指定 key 时，Flutter 会**根据 widget 的类型和位置（slot）**来匹配旧 widget 和新 widget。
+            //
+            // 在 ListView.builder 中，若你修改了某个列表项的内容并 setState，位置不变时大概率会复用成功，所以看起来没问题。
+            //
+            // 但当列表项的顺序变动、插入、删除时，没有 Key 的复用机制就会发生错位更新、错乱 UI、状态泄露等问题。
             text: items[index],
             onTextChanged: (newText) {
               setState(() {
