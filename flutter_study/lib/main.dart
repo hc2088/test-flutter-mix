@@ -31,6 +31,17 @@ import 'test_dispose.dart' as test25;
 import 'ui/test_mediaquery.dart' as test26;
 import 'ui/test_mediaquery_check.dart' as test27;
 
+import 'ui/test_route.dart' as test28;
+import 'ui/test_hero.dart' as test29;
+
+import 'data/test_big_data_transfer.dart' as test30;
+import 'data/test_native_image.dart' as test31;
+
+import 'page/test_page_state.dart' as test32;
+
+import 'algorithm/reverse_list.dart' as test33;
+import 'algorithm/longest_unique_substring.dart' as test34;
+
 // void main() => runApp(test1.MyApp());
 // void main() => test2.main();
 // void main() => test3.main();
@@ -57,4 +68,11 @@ import 'ui/test_mediaquery_check.dart' as test27;
 // void main() => test24.main();
 // void main() => test25.main();
 // void main() => test26.main();
-void main() => test27.main();
+// void main() => test27.main();
+// void main() => test28.main();
+// void main() => test29.main();
+// void main() => test30.main();
+// void main() => test31.main();
+// void main() => test32.main();
+// void main() => test33.main();
+void main() => test34.main();

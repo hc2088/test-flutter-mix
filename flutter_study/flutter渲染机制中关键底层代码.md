@@ -3,7 +3,7 @@
 
 Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     if (newWidget == null) {
-      // 如果新 Widget 为 null，说明应该移除这个 child（也就是销毁）
+      // 1、如果新 Widget 为 null，说明应该移除这个 child（也就是销毁）
       if (child != null) {
         deactivateChild(child);
       }
@@ -15,43 +15,43 @@ Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
       bool hasSameSuperclass = true;
       
    
-      if (hasSameSuperclass && child.widget == newWidget) {//同一个widget， widget没变，例如const修饰的widget
+      if (hasSameSuperclass && child.widget == newWidget) { 
       
-      // 完全一样的 const Widget，Flutter 会复用 Widget 本身（而不仅是 Element）
+        //2、 完全一样的 const Widget，Flutter 会复用 Widget 本身（而不仅是 Element）
       
         if (child.slot != newSlot) {
           updateSlotForChild(child, newSlot);
         }
 
         newChild = child;
-      } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {//key相同，复用element 及其element.state
+      } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {
       
-        // 判断是否可以复用当前 child（Element）
+          //3、 判断是否可以复用当前 child（Element）
+          
+            // 如果可以复用，就调用 child.update() 更新数据
+            //复用的机制是调用原有 Element 的 update() 方法，让它把新 Widget 的数据同步过来
+            
           if (child.slot != newSlot) {
             updateSlotForChild(child, newSlot);
           }
 
  
-            // 如果可以复用，就调用 child.update() 更新数据
-            //复用的机制是调用原有 Element 的 update() 方法，让它把新 Widget 的数据同步过来
+
  
-        child.update(newWidget);//如果是statefullelement，将调用对应的state.didUpdateWidget(oldWidget)
-        //所以这里注意的用法就是 build widget statefullwidget类型widget构造时传递的参数给到widget， 在state到build方法里面如果在initState时结收了widget.xx，而不是build方法中用widget.xx，而使用state.xx，那么这时候就没更新， 需要在didUpdateWidget对state.xx重新赋值
-      
-  
+        child.update(newWidget);
+        
         newChild = child;
-      } else {//key不同、或者
+      } else {//key不同、类型不同
+             //4、如果不能复用，就销毁原有 Element，重新创建一个 
         //我们hot reload时，把一个StatelessWidget改成了StateFullWidget，类名没有改，父类改了
         //这时候runtimeType是相等的，但是应该被当作不同widget，所以不能仅用类名来判断
-        
-        
-            // 如果不能复用，就销毁原有 Element，重新创建一个
+
         deactivateChild(child);
  
         newChild = inflateWidget(newWidget, newSlot);
       }
     } else {
-     // 创建一个新的 Element，并将其挂载
+        // 创建一个新的 Element，并将其挂载
       newChild = inflateWidget(newWidget, newSlot);
     }
  
