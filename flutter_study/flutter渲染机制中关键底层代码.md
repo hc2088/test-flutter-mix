@@ -2,8 +2,12 @@
 ///StatefulElement
 
 Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
-    if (newWidget == null) {
+
+
+
       // 1、如果新 Widget 为 null，说明应该移除这个 child（也就是销毁）
+    if (newWidget == null) {
+
       if (child != null) {
         deactivateChild(child);
       }
@@ -14,37 +18,46 @@ Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     if (child != null) {
       bool hasSameSuperclass = true;
       
-   
+
+
+
+        //2、 完全一样的 const Widget，
+        
+        //Flutter 会复用 Widget 本身（而不仅是 Element）
       if (hasSameSuperclass && child.widget == newWidget) { 
       
-        //2、 完全一样的 const Widget，Flutter 会复用 Widget 本身（而不仅是 Element）
+
       
         if (child.slot != newSlot) {
           updateSlotForChild(child, newSlot);
         }
 
         newChild = child;
-      } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {
+      } 
       
-          //3、 判断是否可以复用当前 child（Element）
-          
+      
+         //3、 判断是否可以复用当前 child（Element）
+            // 类型一致、key一致
+      else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {
+      
             // 如果可以复用，就调用 child.update() 更新数据
             //复用的机制是调用原有 Element 的 update() 方法，让它把新 Widget 的数据同步过来
             
           if (child.slot != newSlot) {
             updateSlotForChild(child, newSlot);
           }
-
- 
-
- 
+          
         child.update(newWidget);
         
         newChild = child;
-      } else {//key不同、类型不同
-             //4、如果不能复用，就销毁原有 Element，重新创建一个 
-        //我们hot reload时，把一个StatelessWidget改成了StateFullWidget，类名没有改，父类改了
-        //这时候runtimeType是相等的，但是应该被当作不同widget，所以不能仅用类名来判断
+      } else {
+           //4、如果不能复用，就销毁原有 Element，重新创建一个
+           key不一致，
+           类型不一致，
+           或者key和类型都不一致，
+           或者类型一致（但是父类变了，stateless改成statefull，
+            我们hot reload时，把一个StatelessWidget改成了StateFullWidget，类名没有改，父类改了，
+            这时候runtimeType是相等的，但是应该被当作不同widget，所以不能仅用类名来判断）
 
         deactivateChild(child);
  

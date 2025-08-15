@@ -3,6 +3,9 @@ class ItemList {
   ItemList? next;
 
   ItemList(this.data);
+
+  //不写任何构造函数，编译器会自动帮你生成一个默认的无参构造函数：
+  //ItemList();
 }
 
 // 原地指针反转链表，返回新的头结点

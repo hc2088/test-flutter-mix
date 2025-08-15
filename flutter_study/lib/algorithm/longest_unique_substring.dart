@@ -1,29 +1,35 @@
-// 返回最长无重复子串内容和长度
-Map<String, dynamic> longestUniqueSubstring(String s) {
-  int left = 0;
+void main() {
+  String s = "abcabcbb";
+  var result = longestSubstringWithoutRepeat(s);
+  print("最长无重复子串: '${result['substring']}', 长度: ${result['length']}");
+}
+
+Map<String, dynamic> longestSubstringWithoutRepeat(String s) {
+  int start = 0; // 窗口起始位置
   int maxLen = 0;
-  int maxStart = 0;
-  Map<String, int> lastIndex = {};
+  int maxStart = 0; // 记录最长子串的起始位置
+  Map<String, int> lastSeen = {}; // 记录每个字符上一次出现的位置
 
-  for (int right = 0; right < s.length; right++) {
-    String c = s[right];
-    if (lastIndex.containsKey(c) && lastIndex[c]! >= left) {
-      left = lastIndex[c]! + 1;
+  for (int end = 0; end < s.length; end++) {
+    String ch = s[end];
+
+    // 如果当前字符出现过，并且位置在当前窗口内，则移动 start
+    if (lastSeen.containsKey(ch) && lastSeen[ch]! >= start) {
+      start = lastSeen[ch]! + 1;
     }
-    lastIndex[c] = right;
 
-    int curLen = right - left + 1;
-    if (curLen > maxLen) {
-      maxLen = curLen;
-      maxStart = left;
+    // 更新当前字符的位置
+    lastSeen[ch] = end;
+
+    // 判断是否为更长的子串
+    if (end - start + 1 > maxLen) {
+      maxLen = end - start + 1;
+      maxStart = start;
     }
   }
 
-  String substring = s.substring(maxStart, maxStart + maxLen);
-  return {'length': maxLen, 'substring': substring};
-}
-
-void main() {
-  var res = longestUniqueSubstring("abcabcbb");
-  print("最长无重复子串: ${res['substring']}, 长度: ${res['length']}");
+  return {
+    "substring": s.substring(maxStart, maxStart + maxLen),
+    "length": maxLen
+  };
 }

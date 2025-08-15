@@ -42,6 +42,9 @@ import 'page/test_page_state.dart' as test32;
 import 'algorithm/reverse_list.dart' as test33;
 import 'algorithm/longest_unique_substring.dart' as test34;
 
+import 'webview_gesture_demo/tab.dart' as test35;
+import 'webview_gesture_demo/tab2.dart' as test36;
+
 // void main() => runApp(test1.MyApp());
 // void main() => test2.main();
 // void main() => test3.main();
@@ -76,3 +79,5 @@ import 'algorithm/longest_unique_substring.dart' as test34;
 // void main() => test32.main();
 // void main() => test33.main();
 void main() => test34.main();
+// void main() => test35.main();
+// void main() => test36.main();

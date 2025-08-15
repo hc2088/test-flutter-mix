@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Test</title>
+    <style>
+        body { margin:0; font-family: sans-serif; }
+        #banner { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; height: 200px; background: #eee; }
+        .slide { flex: 0 0 300px; margin: 0 5px; background: #2196F3; color: #fff; font-size: 36px; display: flex; align-items:center; justify-content:center; scroll-snap-align: start; }
+        #content { height: 1000px; padding: 10px; background: #fafafa; }
+    </style>
+</head>
+<body>
+<div id="banner">
+    <div class="slide">1</div>
+    <div class="slide">2</div>
+    <div class="slide">3</div>
+    <div class="slide">4</div>
+</div>
+<div id="content">
+    <p>这里是网页内容，可上下滑动。</p>
+    <p>模拟长页面内容...</p>
+    <p>继续滚动...</p>
+
+    <a href="https://www.baidu.com" target="_self">
+        <button>跳转二级网页</button>
+    </a>
+
+
+</div>
+
+<script>
+    let startX=0, startY=0, startTime=0;
+    let lastCanSwipe = true;
+    let lockedDirection = null; // 'horizontal' | 'vertical' | null
+    let banner = document.getElementById('banner');
+    const EDGE_THRESHOLD = 5;
+    const SPEED_THRESHOLD = 1.0; // px/ms
+
+    function isBannerEdgeReached(direction){
+        if(direction === 'left') return banner.scrollLeft <= EDGE_THRESHOLD;
+        if(direction === 'right') return banner.scrollLeft + banner.clientWidth >= banner.scrollWidth - EDGE_THRESHOLD;
+        return true;
+    }
+
+    document.addEventListener('touchstart', e=>{
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        startTime = Date.now();
+        lockedDirection = null;
+    }, {passive:true});
+
+    document.addEventListener('touchmove', e=>{
+        const touch = e.touches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        const dt = Math.max(Date.now() - startTime, 1);
+        const speed = absDx/dt;
+
+        const bannerRect = banner.getBoundingClientRect();
+        const inBanner = touch.clientY >= bannerRect.top && touch.clientY <= bannerRect.bottom;
+
+        if(!lockedDirection){
+            lockedDirection = absDx > absDy ? 'horizontal' : 'vertical';
+        }
+
+        if(lockedDirection === 'horizontal'){
+            if(inBanner){
+                if(speed > SPEED_THRESHOLD){
+                    if(lastCanSwipe){
+                        window.flutter_inappwebview.callHandler('updateCanSwipeTab', false);
+                        lastCanSwipe = false;
+                    }
+                } else {
+                    if((dx>0 && isBannerEdgeReached('left')) || (dx<0 && isBannerEdgeReached('right'))){
+                        if(!lastCanSwipe){
+                            window.flutter_inappwebview.callHandler('updateCanSwipeTab', true);
+                            lastCanSwipe = true;
+                        }
+                    } else {
+                        if(lastCanSwipe){
+                            window.flutter_inappwebview.callHandler('updateCanSwipeTab', false);
+                            lastCanSwipe = false;
+                        }
+                    }
+                }
+            } else {
+                if(!lastCanSwipe){
+                    window.flutter_inappwebview.callHandler('updateCanSwipeTab', true);
+                    lastCanSwipe = true;
+                }
+            }
+        } else {
+            if(lastCanSwipe){
+                window.flutter_inappwebview.callHandler('updateCanSwipeTab', false);
+                lastCanSwipe = false;
+            }
+        }
+    }, {passive:true});
+
+    document.addEventListener('touchend', e=>{
+        if(!lastCanSwipe){
+            window.flutter_inappwebview.callHandler('updateCanSwipeTab', true);
+            lastCanSwipe = true;
+        }
+        lockedDirection = null;
+    }, {passive:true});
+</script>
+</body>
+</html>
