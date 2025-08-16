@@ -1,13 +1,167 @@
 import UIKit
 import Flutter
 
+ 
+
 @main
 @objc class AppDelegate: FlutterAppDelegate {
     var textureRegistry: FlutterTextureRegistry?
     var texture: SimpleColorTexture?   // 用自定义类，FlutterPixelBufferTexture 不存在
     var textureId: Int64 = -1
     
+ 
     
+    
+    // 新增：缓存消息队列 & 状态
+    var pendingMessages: [String] = []
+    var dartIsReady: Bool = false
+    var channel3: FlutterMethodChannel?
+    
+    
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        
+        
+        GeneratedPluginRegistrant.register(with: self)
+        
+        
+        
+        let controller = window?.rootViewController as! FlutterViewController
+        if let registrar = controller.registrar(forPlugin: "test") {
+            textureRegistry = registrar.textures()
+        }
+        
+        let channel = FlutterMethodChannel(name: "test.bigdata.channel", binaryMessenger: controller.binaryMessenger)
+        channel.setMethodCallHandler { [weak self] call, result in
+            guard let self = self else { return }
+            switch call.method {
+            case "getImageBytes":
+                let data = self.generateRandomData(size: 5 * 1024 * 1024) // 5MB模拟数据
+                result(FlutterStandardTypedData(bytes: data))
+                
+            case "getImagePath":
+                let data = self.generateRandomData(size: 5 * 1024 * 1024)
+                let path = NSTemporaryDirectory() + "test_img.jpg"
+                try? data.write(to: URL(fileURLWithPath: path))
+                result(path)
+                
+                
+            case "createTexture":
+                
+                self.texture = SimpleColorTexture()
+                if let textureRegistry = self.textureRegistry {
+                    self.textureId = textureRegistry.register(self.texture!)
+                    result(self.textureId)
+                } else {
+                    result(FlutterError(code: "NO_TEXTURE_REGISTRY", message: "Texture registry not found", details: nil))
+                }
+                
+                
+                
+                
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        
+        
+        let controller2 : FlutterViewController = window?.rootViewController as! FlutterViewController
+        let channel2 = FlutterMethodChannel(name: "native.asset.channel", binaryMessenger: controller2.binaryMessenger)
+        
+        textureRegistry = controller2.registrar(forPlugin: "native.asset.channel")?.textures()
+        
+        channel2.setMethodCallHandler { [weak self] (call, result) in
+            guard let self = self else { return }
+            switch call.method {
+            case "getNativeImage":
+                self.handleGetNativeImage(call: call, result: result)
+            case "getNativeImagePath":
+                self.handleGetNativeImagePath(call: call, result: result)
+            case "createTexture":
+                self.handleCreateTexture(result: result)
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        
+        
+        
+        let eventChannel = FlutterEventChannel(name: "com.example/native_event_channel", binaryMessenger: controller.binaryMessenger)
+        let handler = NativeEventHandler()
+        eventChannel.setStreamHandler(handler)
+        
+ 
+        
+        
+        let channel3 = FlutterMethodChannel(name: "com.example/native_channel",
+                                            binaryMessenger: controller.binaryMessenger)
+        
+        channel3.setMethodCallHandler { (call: FlutterMethodCall, result: FlutterResult) in
+            
+          
+            switch call.method {
+                
+                
+            case "getNativeMessage":
+                result("Hello from iOS Native!")
+                handler.sendMessageToFlutter("Hello from iOS Native!")
+                
+                
+                
+            case "markFlutterReady":   // Flutter 主动调用这个方法告诉 iOS：可以发消息了
+                self.dartIsReady = true
+                
+                //Native flush 缓存。
+                self.flushPendingMessages()
+                result("iOS 已收到 Flutter Ready")
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        
+        //直接调用的话， Dart isolate 还没初始化完成。
+        //channel.invokeMethod("sendMessageToFlutter", arguments: "Hello Flutter, this is iOS!")
+        
+        
+        //处理方案：App 启动时，Native 想发的消息不会丢（先缓存）。
+ 
+        sendMessageToFlutter("Hello Flutter, this is iOS!")
+
+
+        
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+    
+    
+ 
+    
+    
+    
+    // 发送消息方法
+    func sendMessageToFlutter(_ message: String) {
+        
+        //尝试立即发消息（如果 Dart 还没 ready，会先缓存）
+        if dartIsReady {
+            //已经ready的话，立即发送
+            channel3?.invokeMethod("sendMessageToFlutter", arguments: message)
+        } else {
+            //没有read，则把消息缓存下来
+            print("Dart not ready, cache message: \(message)")
+            pendingMessages.append(message)
+        }
+    }
+    
+    
+    //  刷新缓存
+    func flushPendingMessages() {
+        
+        for msg in pendingMessages {
+            channel3?.invokeMethod("sendMessageToFlutter", arguments: msg)
+        }
+        pendingMessages.removeAll()
+    }
     
     
     
@@ -68,81 +222,6 @@ import Flutter
         textureId = textureRegistry.register(texture!)
         result(textureId)
     }
-    
-    override func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
-
-
-        GeneratedPluginRegistrant.register(with: self)
-
-
-
-        let controller = window?.rootViewController as! FlutterViewController
-        if let registrar = controller.registrar(forPlugin: "test") {
-            textureRegistry = registrar.textures()
-        }
-        
-        let channel = FlutterMethodChannel(name: "test.bigdata.channel", binaryMessenger: controller.binaryMessenger)
-        channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { return }
-            switch call.method {
-            case "getImageBytes":
-                let data = self.generateRandomData(size: 5 * 1024 * 1024) // 5MB模拟数据
-                result(FlutterStandardTypedData(bytes: data))
-                
-            case "getImagePath":
-                let data = self.generateRandomData(size: 5 * 1024 * 1024)
-                let path = NSTemporaryDirectory() + "test_img.jpg"
-                try? data.write(to: URL(fileURLWithPath: path))
-                result(path)
-                
-                
-            case "createTexture":
-                
-                self.texture = SimpleColorTexture()
-                if let textureRegistry = self.textureRegistry {
-                    self.textureId = textureRegistry.register(self.texture!)
-                    result(self.textureId)
-                } else {
-                    result(FlutterError(code: "NO_TEXTURE_REGISTRY", message: "Texture registry not found", details: nil))
-                }
-                
-                
-       
-                
-            default:
-                result(FlutterMethodNotImplemented)
-            }
-        }
-        
-        
-        let controller2 : FlutterViewController = window?.rootViewController as! FlutterViewController
-        let channel2 = FlutterMethodChannel(name: "native.asset.channel", binaryMessenger: controller2.binaryMessenger)
-        
-        textureRegistry = controller2.registrar(forPlugin: "native.asset.channel")?.textures()
-        
-        channel2.setMethodCallHandler { [weak self] (call, result) in
-            guard let self = self else { return }
-            switch call.method {
-            case "getNativeImage":
-                self.handleGetNativeImage(call: call, result: result)
-            case "getNativeImagePath":
-                self.handleGetNativeImagePath(call: call, result: result)
-            case "createTexture":
-                self.handleCreateTexture(result: result)
-            default:
-                result(FlutterMethodNotImplemented)
-            }
-        }
-        
-        
-        
-        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-    }
-    
-    
     
 }
 

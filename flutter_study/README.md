@@ -5,7 +5,7 @@ Stream async*异步生成器 返回多个结果
 Iterable sync* 同步生成器 返回多个结果
   
 
-2、flutter跟原生通信,ffi和methodchannel,eventchannel
+2、flutter跟原生通信,ffi和methodchannel,eventchannel,BasicMessageChannel
 3、flutter几种常见状态管理区别,为什么能更新状态
 5、dart的事件循环，微任务队列和事件队列，执行顺序
 5、怎么刷新dialog

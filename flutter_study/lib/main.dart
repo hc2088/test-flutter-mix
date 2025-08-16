@@ -44,6 +44,8 @@ import 'algorithm/longest_unique_substring.dart' as test34;
 
 import 'webview_gesture_demo/tab.dart' as test35;
 import 'webview_gesture_demo/tab2.dart' as test36;
+import 'native/test_channel.dart' as test37;
+import 'native/test_event_channel.dart' as test38;
 
 // void main() => runApp(test1.MyApp());
 // void main() => test2.main();
@@ -78,6 +80,9 @@ import 'webview_gesture_demo/tab2.dart' as test36;
 // void main() => test31.main();
 // void main() => test32.main();
 // void main() => test33.main();
-void main() => test34.main();
+// void main() => test34.main();
 // void main() => test35.main();
 // void main() => test36.main();
+// void main() => test37.main();
+void main() => test38.main();
+
