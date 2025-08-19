@@ -33,6 +33,7 @@ import 'ui/test_mediaquery_check.dart' as test27;
 
 import 'ui/test_route.dart' as test28;
 import 'ui/test_hero.dart' as test29;
+import 'ui/test_hero_list.dart' as test39;
 
 import 'data/test_big_data_transfer.dart' as test30;
 import 'data/test_native_image.dart' as test31;
@@ -46,6 +47,8 @@ import 'webview_gesture_demo/tab.dart' as test35;
 import 'webview_gesture_demo/tab2.dart' as test36;
 import 'native/test_channel.dart' as test37;
 import 'native/test_event_channel.dart' as test38;
+import 'page/test_route_page.dart' as test40;
+import 'page/test_provider_page.dart' as test41;
 
 // void main() => runApp(test1.MyApp());
 // void main() => test2.main();
@@ -84,5 +87,7 @@ import 'native/test_event_channel.dart' as test38;
 // void main() => test35.main();
 // void main() => test36.main();
 // void main() => test37.main();
-void main() => test38.main();
-
+// void main() => test38.main();
+// void main() => test39.main();
+// void main() => test40.main();
+void main() => test41.main();
