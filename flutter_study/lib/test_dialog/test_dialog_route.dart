@@ -143,6 +143,7 @@ class _HomePageState extends State<HomePage> {
   void _showDialog() {
     //弹窗（Dialog）本质上是使用 Navigator.of(context).overlay.insert(...) 创建的一个 OverlayEntry。
     //Dialog 不在你当前页面的 widget 树上，但它仍然属于当前的 Navigator 管理的 overlay 栈。
+    //这里的 Overlay 指的是：Navigator 内部全局维护的那个 Overlay。
     showDialog(
       context: context,
       builder: (ctx) {
