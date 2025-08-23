@@ -68,6 +68,13 @@ class _Page1State extends State<Page1> {
   }
 
   @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    print("_pagedidChangeDependencies:_Page1State ");
+  }
+
+  @override
   Widget build(BuildContext context) {
     print('Page1 build'); // 用于观察build调用次数
 
@@ -186,6 +193,7 @@ class Page2 extends StatelessWidget {
             // 3️⃣ Tooltip
             Tooltip(
               message: '这是一个 Tooltip 提示',
+              preferBelow: false,
               child: ElevatedButton(
                   child: const Text('长按显示 Tooltip'), onPressed: () {}),
             ),
@@ -195,6 +203,17 @@ class Page2 extends StatelessWidget {
             ElevatedButton(
               child: const Text('显示 SnackBar'),
               onPressed: () {
+
+
+              /*
+
+              为什么它们用不同的 State?
+                  Dialog → 全局路由层控制，由 Navigator 管理。
+                  SnackBar → 页面 UI 控制，由 ScaffoldMessenger 管理。
+              这种分离是 Flutter 设计的一部分：
+                  Navigator 负责页面和弹窗级别的堆叠。
+                  ScaffoldMessenger 负责 Scaffold 内部短暂提示（SnackBar、MaterialBanner 等）。
+                */
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('这是一个 SnackBar')),
                 );

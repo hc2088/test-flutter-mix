@@ -51,6 +51,10 @@ import 'page/test_route_page.dart' as test40;
 import 'page/test_provider_page.dart' as test41;
 import 'ui/test_overlay.dart' as test42;
 
+import 'getx/test_permanent.dart' as test43;
+import 'getx/test_safe_getto.dart' as test44;
+import 'getx/test_element_dirty.dart' as test45;
+
 // void main() => runApp(test1.MyApp());
 // void main() => test2.main();
 // void main() => test3.main();
@@ -92,4 +96,7 @@ import 'ui/test_overlay.dart' as test42;
 // void main() => test39.main();
 // void main() => test40.main();
 // void main() => test41.main();
-void main() => test42.main();
+// void main() => test42.main();
+// void main() => test43.main();
+void main() => test44.main();
+// void main() => test45.main();

@@ -3,6 +3,36 @@
 
 Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
 
+Element 只能在同一颗 Widget 树中复用
+复用发生的前提是：同一父级、相同位置、相同类型且 Key 相同
+
+
+举例总结
+1、Text("A") → Text("B")
+
+    hasSameSuperclass = true
+    
+    canUpdate = true → 复用
+
+2、Text("A") → Container()
+
+    hasSameSuperclass = false
+    
+    不复用 → deactivateChild → inflateWidget
+
+3、StatefulWidget Counter → StatelessWidget Counter
+
+    hasSameSuperclass = false
+    
+    不复用
+
+4、MyButton extends StatelessWidget → MyButton extends StatelessWidget
+
+    hasSameSuperclass = true
+    
+    如果 key 相同 → 复用
+
+
 
 
       // 1、如果新 Widget 为 null，说明应该移除这个 child（也就是销毁）
@@ -18,8 +48,11 @@ Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
     if (child != null) {
       bool hasSameSuperclass = true;
       
-
-
+    hasSameSuperclass 的目的
+    hasSameSuperclass = oldElementClass == newWidgetClass;
+            目的：检查旧 Element 和新 Widget 的“运行时类型体系”是否一致。
+            它比 Widget.canUpdate 更粗粒度，用于避免完全不相关类型的错误复用。
+    如果 不属于同一类型体系（比如 Text → Container），则一定不能复用，必须走 inflateWidget 创建新 Element。
 
         //2、 完全一样的 const Widget，
         
