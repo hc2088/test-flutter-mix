@@ -23,6 +23,19 @@ class OverlayExample extends StatefulWidget {
 }
 
 class _OverlayExampleState extends State<OverlayExample> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Overlay 示例")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => _showOverlay(context),
+          child: const Text("显示 Overlay"),
+        ),
+      ),
+    );
+  }
+
   OverlayEntry? _overlayEntry;
 
   void _showOverlay(BuildContext context) {
@@ -51,6 +64,8 @@ class _OverlayExampleState extends State<OverlayExample> {
       ),
     );
 
+    // 把 OverlayEntry 插入到 Overlay 上后，它绑定的 Widget 就会显示在屏幕上，成为悬浮层。
+    // 你需要自己管理它的显示、更新和移除，如果想响应点击或显示主题效果，通常要用 Material 包裹。
     Overlay.of(context).insert(_overlayEntry!);
 
     // 3 秒后自动移除
@@ -62,18 +77,5 @@ class _OverlayExampleState extends State<OverlayExample> {
   void _removeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Overlay 示例")),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () => _showOverlay(context),
-          child: const Text("显示 Overlay"),
-        ),
-      ),
-    );
   }
 }

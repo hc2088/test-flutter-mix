@@ -20,6 +20,7 @@ import 'isolate/test_microtask_event.dart' as test12;
 import 'isolate/test_isolate.dart' as test16;
 import 'isolate/test_compute.dart' as test17;
 import 'isolate/test_event.dart' as test18;
+import 'isolate/test_eventsink.dart' as test48;
 
 import 'crash/test_runzoneguard.dart' as test19;
 import 'crash/test_runzoneguard_isolate.dart' as test20;
@@ -49,11 +50,14 @@ import 'native/test_channel.dart' as test37;
 import 'native/test_event_channel.dart' as test38;
 import 'page/test_route_page.dart' as test40;
 import 'page/test_provider_page.dart' as test41;
+import 'page/test_dialog.dart' as test46;
 import 'ui/test_overlay.dart' as test42;
 
 import 'getx/test_permanent.dart' as test43;
 import 'getx/test_safe_getto.dart' as test44;
 import 'getx/test_element_dirty.dart' as test45;
+import 'ui/test_visbility_animation.dart' as test47;
+
 
 // void main() => runApp(test1.MyApp());
 // void main() => test2.main();
@@ -98,5 +102,8 @@ import 'getx/test_element_dirty.dart' as test45;
 // void main() => test41.main();
 // void main() => test42.main();
 // void main() => test43.main();
-void main() => test44.main();
+// void main() => test44.main();
 // void main() => test45.main();
+// void main() => test46.main();
+// void main() => test47.main();
+void main() => test48.main();
