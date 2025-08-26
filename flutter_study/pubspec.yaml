@@ -38,6 +38,7 @@ dependencies:
   provider: ^6.1.5
   flutter_inappwebview: ^6.0.0
   get: ^4.6.6
+  uuid:
 
 dev_dependencies:
   flutter_test:
