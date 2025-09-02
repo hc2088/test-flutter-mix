@@ -17,6 +17,18 @@ void main() {
           Get.create<DetailController>(() => DetailController());
         }),
       ),
+      GetPage(
+        name: '/detailPage2',
+        page: () => DetailPage2(),
+        binding: BindingsBuilder(() {
+          //是指从这个页面push后面的所有路由都算，因为绑定当前路由是从跳转/detailPage2时，创建了对象，再/otherPage时，因为上个页面没关闭controller还在，再otherPage获取到的也是这同一个controller
+          Get.put(DetailController());
+        }),
+      ),
+      GetPage(
+        name: '/otherPage',
+        page: () => OtherPage(),
+      ),
     ],
   ));
 }
@@ -86,6 +98,12 @@ class EntryPage extends StatelessWidget {
                 Get.toNamed("/detailPage");
               },
             ),
+            ElevatedButton(
+              child: Text('detailPage2--toNamed--测试控制器作用域'),
+              onPressed: () {
+                Get.toNamed("/detailPage2");
+              },
+            ),
           ],
         ),
       ),
@@ -151,6 +169,7 @@ class SecondTagController extends GetxController {
 
 class DetailController extends GetxController {
   var count = 0.obs;
+  String str = "DetailController";
 
   @override
   void onInit() {
@@ -188,6 +207,7 @@ class HomePage extends StatelessWidget {
 
         */
 
+    //permanent 永久的
     //如果permanent是true，不会在页面关闭时清空控制器
 
     //static void _removeDependencyByRoute(Route routeName) ：
@@ -351,6 +371,7 @@ class DetailPage extends StatelessWidget {
     );
   }
 }
+
 // S put<S>(
 //     S dependency, {
 //       String? tag,
@@ -359,7 +380,7 @@ class DetailPage extends StatelessWidget {
 //       InstanceBuilderCallback<S>? builder,
 //     }) {
 //   _insert(
-//       isSingleton: true,
+//       isSingleton: true,/// 单例
 //       name: tag,
 //       permanent: permanent,
 //       builder: builder ?? (() => dependency)); //这里统一再包装成懒加载
@@ -405,10 +426,10 @@ class DetailPage extends StatelessWidget {
 // void create<S>(
 //     InstanceBuilderCallback<S> builder, {
 //       String? tag,
-//       bool permanent = true,
+//       bool permanent = true,//
 //     }) {
 //   _insert(
-//     isSingleton: false,
+//     isSingleton: false,//非单例
 //     name: tag,
 //     builder: builder,
 //     permanent: permanent,
@@ -452,10 +473,64 @@ class DetailPage extends StatelessWidget {
 //       dependency = builderFunc();
 //     }
 //     return dependency!;//不为空则复用
-//   } else { //create方法不是单例
+//   } else { //create方法不是单例---每次都创建新对象
 //     return builderFunc(); // 在put 那里对象通过 懒加载返回，create方法也是通过builder加载返回
 //   }
 // }
 //
 //
 //
+class DetailPage2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // 通过 Get.find 获取绑定的控制器实例
+    final controller = Get.find<DetailController>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Detail Page 2'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              controller.increment(); // 点击加号修改 count
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Obx(() => Text('当前值: ${controller.count}')),
+          ElevatedButton(
+            child: Text('跳转 DetailPage2---测试作用域--'),
+            onPressed: () {
+              Get.toNamed("/detailPage2", preventDuplicates: false);
+            },
+          ),
+          ElevatedButton(
+            child: Text('跳转 OtherPage'),
+            onPressed: () {
+              Get.toNamed("/otherPage", preventDuplicates: false);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OtherPage extends StatelessWidget {
+  const OtherPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    ///检查是不是？
+    ///在使用 Get.find<DetailController>() 时，是否需要检查当前绑定的路由，取决于你 DetailController 的注册方式和作用域。
+    final controller = Get.find<DetailController>();
+
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(child: Text("other page: ${controller.str}")),
+    );
+  }
+}
