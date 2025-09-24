@@ -1,0 +1,84 @@
+你想用 pyenv 管理多版本 Python，在 macOS 上实现同时安装和切换多个 Python 版本。下面我帮你整理一个完整方案：
+
+1️⃣ 安装 pyenv（如果还没装）
+# 安装依赖（macOS Homebrew）
+brew update
+brew install openssl readline zlib xz
+
+# 安装 pyenv
+brew install pyenv
+
+
+然后在 shell 配置文件（zsh: ~/.zshrc）里添加：
+
+# pyenv 初始化
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+
+
+保存后执行：
+
+source ~/.zshrc
+
+
+检查是否安装成功：
+
+pyenv --version
+
+2️⃣ 查看可安装的 Python 版本
+# 列出所有 3.x 版本
+pyenv install --list | grep " 3\."
+
+# 精确匹配 3.8 - 3.12
+pyenv install --list | grep -E "3\.(8|9|10|11|12)\.[0-9]+"
+
+3️⃣ 安装多个 Python 版本
+# 安装 Python 3.6.15
+pyenv install 3.6.15
+
+# 安装 Python 3.11.9
+pyenv install 3.11.9
+
+
+如果报依赖错误，参考：
+
+env LDFLAGS="-L/opt/homebrew/opt/openssl/lib" \
+CPPFLAGS="-I/opt/homebrew/opt/openssl/include" \
+PKG_CONFIG_PATH="/opt/homebrew/opt/openssl/lib/pkgconfig" \
+pyenv install 3.11.9
+
+4️⃣ 切换 Python 版本
+全局版本（所有终端默认使用）
+pyenv global 3.11.9
+python --version
+
+项目目录版本（仅当前目录生效）
+cd ~/my_project
+pyenv local 3.11.9
+python --version
+
+临时切换（当前 shell 会话有效）
+pyenv shell 3.6.15
+python --version
+
+5️⃣ 管理 pip / 包
+
+每个 Python 版本独立 pip 环境，安装包不会冲突：
+
+# 安装 Mammoth
+python -m pip install --upgrade pip
+python -m pip install mammoth
+
+
+不同项目可以使用不同 Python 版本和包版本。
+
+6️⃣ 查看当前可用版本
+pyenv versions
+
+
+输出示例：
+
+* 3.11.9 (set by /Users/you/.pyenv/version)
+  3.6.15

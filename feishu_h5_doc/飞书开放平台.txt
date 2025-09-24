@@ -1,0 +1,29 @@
+
+飞书开放平台：
+https://open.feishu.cn/api-explorer/cli_a85a1a4ab1b1501c?apiName=get&from=guide&project=docs&resource=content&version=v1
+
+
+1、使用飞书api，-》下载markdown-》转化成html 
+  没有小划线了
+
+  USER_ACCESS_TOKEN 从飞书开放平台获取。
+  
+python batch_fetch_feishu.py <USER_ACCESS_TOKEN> --file 协议.txt
+
+
+2、使用 nodejs mammoth
+ 从飞书链接我这边是吧 飞书文档 先导出成word文档  
+  然后word转成HTML（自己写或者找在线工具转） 
+
+
+    node batch-convert.js ./source ./dist   
+
+docx4js方式报错。不用。
+
+
+3、使用python
+ 标题加粗的样式丢了
+  
+  python batch_convert.py ./source ./dist
+
+推荐用方式2
