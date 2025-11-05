@@ -57,6 +57,24 @@ import 'getx/test_permanent.dart' as test43;
 import 'getx/test_safe_getto.dart' as test44;
 import 'getx/test_element_dirty.dart' as test45;
 import 'ui/test_visbility_animation.dart' as test47;
+import 'showcase/main.dart' as test49;
+
+// import 'card/main.dart' as test50;
+// import 'card/test2.dart' as test50;
+// import 'card/test3.dart' as test50;
+// import 'card/test4.dart' as test50;
+// import 'card/test5.dart' as test50;
+// import 'card/test8.dart' as test50;
+// import 'card/test7.dart' as test50;
+// import 'card/test7-2.dart' as test50;
+// import 'card/test7-3.dart' as test50;
+import 'card/test7-9.dart' as test50;
+
+import 'dart/testas.dart' as test51;
+
+// import 'card/test6.dart' as test50;
+// import 'card/test9.dart' as test50;
+// import 'card/test10.dart' as test50;
 
 // void main() => runApp(test1.MyApp());
 // void main() => test2.main();
@@ -64,7 +82,7 @@ import 'ui/test_visbility_animation.dart' as test47;
 // void main() => test4.main();
 // void main() => test5.main();
 // void main() => test6.main();
-// void main() => test7.main();
+// void main() => test7.dart.main();
 // void main() => test8.main();
 // void main() => test9.main();
 // void main() => test10.main();
@@ -105,4 +123,6 @@ import 'ui/test_visbility_animation.dart' as test47;
 // void main() => test45.main();
 // void main() => test46.main();
 // void main() => test47.main();
-void main() => test48.main();
+// void main() => test49.main();
+// void main() => test50.main();
+void main() => test51.main();
