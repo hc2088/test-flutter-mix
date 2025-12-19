@@ -101,6 +101,7 @@ class _NestedRefreshDemoState extends State<NestedRefreshDemo>
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: data[index].length,
+                primary: true,//需要改为true，否则listview滑动不会联动外层滚动
                 itemBuilder: (_, i) {
                   return Container(
                     height: 70,
