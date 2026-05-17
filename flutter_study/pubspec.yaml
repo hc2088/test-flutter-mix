@@ -41,7 +41,10 @@ dependencies:
   uuid:
   path_provider:
   showcaseview:
-  cached_network_image: ^3.3.1
+  cached_network_image:
+    path: ./cached_network_image-3.4.1
+  flutter_cache_manager: ^3.4.1
+
   palette_generator:
   pull_to_refresh: ^2.0.0
 
