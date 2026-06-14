@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # 使用示例：
-# ./add_submodule.sh https://github.com/alibaba/flutter_boost.git submodules/flutter_boost
+# cd test-flutter-mix
+# ./Tools/add_submodule.sh https://github.com/alibaba/flutter_boost.git submodules/flutter_boost
 
 REPO_URL=$1
 LOCAL_PATH=$2

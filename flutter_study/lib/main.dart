@@ -62,6 +62,7 @@ import 'ui/test_visbility_animation.dart' as test47;
 import 'showcase/main.dart' as test49;
 import 'memory/test_memory_optimization.dart' as test52;
 import 'memory/test_cached_network_image_source_study.dart' as test53;
+import 'pigeon_demo/pigeon_demo_main.dart' as test54;
 
 // import 'card/main.dart' as test50;
 // import 'card/test2.dart' as test50;
@@ -132,4 +133,6 @@ import 'custom_scrollView/test_nested_scroll_view.dart' as test51;
 // void main() => test49.main();
 // void main() => test50.main();
 // void main() => test51.main();
-void main() => test53.main();
+// void main() => test53.main();
+void main() => test54.main();
+
