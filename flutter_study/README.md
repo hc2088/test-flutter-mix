@@ -1,3 +1,22 @@
+# flutter_study
+
+## 运行与适配基线
+
+当前项目基于 **Flutter 3.38.5（stable）** 完成运行适配和 Android
+构建验证，对应 Dart 版本为 **3.10.4**。
+
+建议使用相同的 Flutter 版本运行项目，避免 Gradle、Android Gradle Plugin
+或 Kotlin 插件版本不匹配。Android 构建版本调整详情见
+[Android 构建适配说明](Docs/Android构建适配说明.md)。
+
+```sh
+flutter --version
+flutter pub get
+flutter run
+```
+
+## 学习清单
+
 1、future和stream区别 
   stream 多次性的异步数据流
   future 只返回一次性结果
