@@ -1,6 +1,6 @@
 # Flutter 面试题速记版
 
-目标：基于 [t.md](/Users/huchu/Desktop/test-flutter-mix/flutter_study/lib/t.md:1) 提炼一套“简洁好记”的面试题。  
+目标：基于 [Flutter三棵树Element复用与State生命周期源码解析.md](/Users/huchu/Desktop/test-flutter-mix/flutter_study/Docs/Flutter三棵树Element复用与State生命周期源码解析.md:1) 提炼一套“简洁好记”的面试题。  
 建议背法：先背每题第一句，再按需要展开第二句。
 
 ---

@@ -4,7 +4,10 @@
 Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
 
 Element 只能在同一颗 Widget 树中复用
-复用发生的前提是：同一父级、相同位置、相同类型且 Key 相同
+复用发生的前提是：
+同一父级、
+相同位置、
+相同类型 且 Key 相同
 
 
 举例总结
@@ -49,7 +52,22 @@ Element 只能在同一颗 Widget 树中复用
       bool hasSameSuperclass = true;
       
     hasSameSuperclass 的目的
+    
+                  static int _debugConcreteSubtype(Element element) {
+                return element is StatefulElement ? 1 :
+                       element is StatelessElement ? 2 :
+                       0;
+              }  static int _debugConcreteSubtype(Widget widget) {
+                return widget is StatefulWidget ? 1 :
+                       widget is StatelessWidget ? 2 :
+                       0;
+              }
+                   final int oldElementClass = Element._debugConcreteSubtype(child);
+                    final int newWidgetClass = Widget._debugConcreteSubtype(newWidget);
+  
     hasSameSuperclass = oldElementClass == newWidgetClass;
+
+    
             目的：检查旧 Element 和新 Widget 的“运行时类型体系”是否一致。
             它比 Widget.canUpdate 更粗粒度，用于避免完全不相关类型的错误复用。
     如果 不属于同一类型体系（比如 Text → Container），则一定不能复用，必须走 inflateWidget 创建新 Element。
@@ -68,6 +86,12 @@ Element 只能在同一颗 Widget 树中复用
         newChild = child;
       } 
       
+      
+                 static bool canUpdate(Widget oldWidget, Widget newWidget) {
+                     return oldWidget.runtimeType == newWidget.runtimeType
+                    && oldWidget.key == newWidget.key;
+                 }
+ 
       
          //3、 判断是否可以复用当前 child（Element）
             // 类型一致、key一致
@@ -107,11 +131,8 @@ Element 只能在同一颗 Widget 树中复用
 }
 
 
-// 判断是否复用的关键
-static bool canUpdate(Widget oldWidget, Widget newWidget) {
-  return oldWidget.runtimeType == newWidget.runtimeType && //类型一致
-         oldWidget.key == newWidget.key;    //key 一致
-}
+
+
 
 //满足这两个条件，说明可以复用旧的 Element 实例，只更新内部状态。
 //否则，说明是不同的 Widget，不能复用，必须销毁旧的，创建新的。

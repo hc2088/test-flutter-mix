@@ -43,9 +43,6 @@ import 'data/test_native_image.dart' as test31;
 
 import 'page/test_page_state.dart' as test32;
 
-import 'algorithm/reverse_list.dart' as test33;
-import 'algorithm/longest_unique_substring.dart' as test34;
-
 import 'webview_gesture_demo/tab.dart' as test35;
 import 'webview_gesture_demo/tab2.dart' as test36;
 import 'native/test_channel.dart' as test37;

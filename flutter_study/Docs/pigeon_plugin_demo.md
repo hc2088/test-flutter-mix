@@ -311,3 +311,93 @@ Pigeon 的收益：
 - 接口改名后要同步实现生成协议的方法名。
 
 一句话：`wakelock_plus` 的注册代码看起来绕，是因为它把“通道注册、编解码、参数转换、错误返回”都交给 Pigeon 生成代码处理了；你手写的插件类只负责真正的业务逻辑。
+
+## 11. Pigeon 底层到底用哪个通道
+
+先给结论：
+
+| 方案 | 底层/直接使用的 Flutter 通信机制 | 适合场景 |
+| --- | --- | --- |
+| `MethodChannel` | 直接基于 `BinaryMessenger` 发送方法调用消息 | 双向异步方法调用，常用于一次调用一次返回 |
+| `EventChannel` | 直接基于 `BinaryMessenger` 做事件流订阅和分发 | Native 持续推送事件到 Flutter，比如传感器、下载进度、播放器状态 |
+| `BasicMessageChannel` | 直接基于 `BinaryMessenger` 发送任意消息 | 双向消息、结构更自由、想自己控制消息格式 |
+| `Pigeon @HostApi / @FlutterApi` | 生成代码里默认创建 `BasicMessageChannel` | 类型安全的 Flutter 和 Native 双向调用 |
+| `Pigeon @EventChannelApi` | 生成代码里创建 `EventChannel` | 用 Pigeon 生成 Native 到 Flutter 的事件流代码 |
+| `FFI` | 不走 Platform Channel，走 Dart VM 的 `dart:ffi` C ABI 调用 | 高频、同步、性能敏感的 native 函数调用 |
+
+所以你问“Pigeon、Flutter 和 Native 通讯底层用的是 `MethodChannel`、`EventChannel`、`BasicMessageChannel` 还是 `FFI`”：  
+
+**普通 Pigeon 接口，也就是 `@HostApi()` 和 `@FlutterApi()`，底层生成的是 `BasicMessageChannel`，不是 `MethodChannel`，也不是 `FFI`。**
+
+当前 demo 的生成文件可以直接证明这一点。
+
+Dart 端 `pigeon_demo_plugin/lib/src/messages.g.dart` 里，调用 `getDeviceInfo` 时创建的是：
+
+```dart
+final BasicMessageChannel<Object?> pigeonVar_channel =
+    BasicMessageChannel<Object?>(
+  pigeonVar_channelName,
+  pigeonChannelCodec,
+  binaryMessenger: pigeonVar_binaryMessenger,
+);
+```
+
+Android 端 `pigeon_demo_plugin/android/src/main/kotlin/com/example/pigeon_demo_plugin/Messages.g.kt` 里，注册处理器时创建的是：
+
+```kotlin
+val channel = BasicMessageChannel<Any?>(
+  binaryMessenger,
+  "dev.flutter.pigeon.pigeon_demo_plugin.NativeDemoApi.getDeviceInfo$separatedMessageChannelSuffix",
+  codec
+)
+```
+
+iOS 端 `pigeon_demo_plugin/ios/Classes/messages.g.m` 里，注册处理器时创建的是：
+
+```objc
+FlutterBasicMessageChannel *channel =
+  [[FlutterBasicMessageChannel alloc]
+    initWithName:@"dev.flutter.pigeon.pigeon_demo_plugin.NativeDemoApi.getDeviceInfo"
+    binaryMessenger:binaryMessenger
+    codec:PGNGetMessagesCodec()];
+```
+
+注意这里有两个容易混的点。
+
+第一，`BinaryMessenger` 不是一种和 `MethodChannel` 并列的 channel。它更像 Flutter 引擎提供的底层消息收发器，`MethodChannel`、`EventChannel`、`BasicMessageChannel` 都是建立在 `BinaryMessenger` 之上的封装。Pigeon 生成的 `SetUp...Api(registrar.messenger, instance)` 或 `NativeDemoApi.setUp(binding.binaryMessenger, this)`，传进去的就是这个底层 messenger。
+
+第二，`MethodChannel` 也可以双向调用。Dart 可以 `invokeMethod` 调 Native，Native 也可以通过同一个 channel name 的 `MethodChannel` 调 Dart，只要另一端注册了 method call handler 就能收到。它和 `EventChannel` 的区别不在于“能不能双向”，而在于通信模型：`MethodChannel` 更像一次方法调用配一次结果；`EventChannel` 更像 Native 持续推送一串事件。
+
+第三，`Pigeon` 本身不是一种运行时通道。它是代码生成器。你写 `pigeons/messages.dart`，它帮你生成 Dart、iOS、Android 等端的类型、codec、channel name、注册函数和错误包装。真正运行时收发消息的还是 Flutter 的 platform channel 体系。
+
+可以把层级理解成：
+
+```text
+Dart API / Native API
+  -> Pigeon 生成的类型安全包装代码
+  -> BasicMessageChannel 或 EventChannel
+  -> BinaryMessenger
+  -> Flutter Engine
+  -> Android/iOS/macOS/Windows/Linux Native
+```
+
+而 `FFI` 是另一条路：
+
+```text
+Dart
+  -> dart:ffi
+  -> DynamicLibrary / C ABI
+  -> C/C++/Rust/Objective-C 暴露出来的 C 函数
+```
+
+`FFI` 不经过 `MethodChannel`、`EventChannel`、`BasicMessageChannel`，也不通过 `BinaryMessenger` 发 platform message。它更接近“Dart 直接调用 native 动态库函数”。所以在性能上适合高频、小粒度、同步计算类调用，但它不适合直接操作 Android `Activity`、iOS `UIViewController` 这种平台生命周期对象；这类系统能力通常还是用插件通道或 Pigeon 更自然。
+
+一句话记忆：
+
+```text
+MethodChannel：双向异步方法调用，常见是一问一答。
+EventChannel：Native 连续推事件给 Flutter。
+BasicMessageChannel：更底层、更自由的消息通道。
+Pigeon：代码生成器，普通 HostApi/FlutterApi 默认生成 BasicMessageChannel。
+FFI：不走 Flutter channel，直接调 native 动态库函数。
+```
