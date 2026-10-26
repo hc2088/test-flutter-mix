@@ -66,3 +66,5 @@ app.*.map.json
 
 weekly_report.md
 weekly_report_summary.md
+flutter_study/cached_network_image-3.4.1/example/android/.gradle
+flutter_study/pigeon_demo_plugin/android/.gradle

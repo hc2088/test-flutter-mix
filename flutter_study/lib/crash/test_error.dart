@@ -1,45 +1,95 @@
 import 'dart:async';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  // runApp(MyApp());
+// Dart 并发与事件循环：
+// - async/Future/Timer 不会创建 isolate；主 isolate 上的同步耗时计算仍会卡住 UI。
+// - Isolate.spawn 自建 worker 并用端口通信；Isolate.run 和 compute 用于一次性计算；spawnUri 从 Dart 文件启动。
+//   compute 在原生平台运行于新 isolate，在 Web 上仍运行于当前 event loop。
+// - 每个 isolate 有自己的内存和事件循环：同步代码 → 清空微任务 → 处理下一个 event。
+//   微任务：scheduleMicrotask、Future.microtask、已完成 Future 的 then 回调。
+//   Future.sync 的计算函数立即执行，不属于微任务；Future(computation)、Timer.run、I/O 和 UI 输入走 event。
 
-  //空指针、未捕获异常、类型错误等
-  //未捕获异常是指：
-  //UI 层异常 → FlutterError.onError 处理
-  //
-  //         build() 方法里抛的异常
-  //
-  //        setState() 内抛出的异常
-  //
-  //        Widget 生命周期方法中的异常
-  //
-  //
-  // 如果不设置，Flutter 默认会打印异常并闪退，但不一定能上报。
+RawReceivePort? _currentIsolateErrorPort;
+
+// 声明在各 isolate 中都可见；late 的值彼此独立，子 isolate 读取前也要自己赋值。
+late String str;
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Flutter 框架捕获的错误（如 build、layout、paint）从这里输出并上报。
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
-    Zone.current.handleUncaughtError(details.exception, details.stack!);
+    _reportError(details.exception, details.stack ?? StackTrace.empty);
   };
+  str = 'aaa'; // 这是主 isolate 的值。
+  // 未处理的 Future 异常由此入口上报；当前注释时不会调用 _reportError。
+  PlatformDispatcher.instance.onError = _reportError;
 
-  //这里的未捕获异常是指：
-  // 用于捕获当前 Dart Isolate 中未被捕获的同步或异步异常，包括：
-  //
-  //      Future 里未处理的异常
-  //
-  //      Stream 里的异常
-  //
+  // 启动时自动注册当前 isolate 的错误端口，不需要用户操作。
+  _registerCurrentIsolateErrorListener();
 
-  //
+  runApp(const MyApp());
+}
 
-  runZonedGuarded(() {
-    runApp(MyApp());
-  }, (Object error, StackTrace stackTrace) {
-    print('捕获到未处理异常：$error');
+bool _reportError(Object error, StackTrace stackTrace) {
+  // 本项目尚未配置 firebase_crashlytics；接入后在此调用 recordError。
+  // 目前返回 false，让 Flutter 保留默认错误输出。
+  debugPrint(error.toString());
+  debugPrintStack(stackTrace: stackTrace);
+  return false;
+}
+
+void _registerCurrentIsolateErrorListener() {
+  if (_currentIsolateErrorPort != null) return;
+
+  final port = RawReceivePort((dynamic message) {
+    _reportIsolateError(message);
   });
 
-  //Dart 层异步异常 → runZonedGuarded 处理
+  _currentIsolateErrorPort = port;
+  // 向 VM 注册当前 isolate 的错误端口；该 isolate 的未捕获错误会发到此 port。
+  Isolate.current.addErrorListener(port.sendPort);
+}
+
+void _reportIsolateError(dynamic message) {
+  // VM 消息包含错误文本和堆栈文本；RawReceivePort handler 在 Zone.root 中运行。
+  final pair = message as List<dynamic>;
+  final errorText = pair[0] as String;
+  final stackText = pair[1] as String?;
+  final remoteError = RemoteError(errorText, stackText ?? '');
+  _reportError(remoteError, remoteError.stackTrace);
+}
+
+Future<void> _startChildIsolateErrorDemo() async {
+  late final RawReceivePort errorPort;
+  errorPort = RawReceivePort((dynamic message) {
+    _reportIsolateError(message);
+    errorPort.close();
+  });
+
+  try {
+    // 子 isolate 不会自动转到根 isolate；每次 spawn 都要单独传 onError。
+    await Isolate.spawn<String>(
+      _simulateChildIsolateBusinessError,
+      '子 isolate 业务异常',
+      onError: errorPort.sendPort,
+    );
+  } catch (error, stackTrace) {
+    errorPort.close();
+    _reportError(error, stackTrace);
+  }
+}
+
+void _simulateChildIsolateBusinessError(String message) {
+  // 模拟子 isolate 执行业务逻辑时发生未捕获异常，由 spawn 的 onError 转回父 isolate。
+  debugPrint(
+      str); //这里确实会发生异常了:LateInitializationError: Field 'str' has not been initialized.
+  str = '123123'; //执行不到这里， 这是子 isolate 自己的值，不会改动主 isolate 的 str。
 }
 
 class MyApp extends StatelessWidget {
@@ -49,41 +99,89 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Container(),
+        appBar: AppBar(title: const Text('Flutter 异常捕获示例')),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // 模拟框架主动调用 FlutterError.reportError。
+                  FlutterError.reportError(
+                    FlutterErrorDetails(
+                      exception: StateError('Flutter 框架错误示例'),
+                      library: 'test_error.dart',
+                    ),
+                  );
+                },
+                child: const Text('触发 FlutterError.onError'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  // 启用 PlatformDispatcher 注册后，此 Future 错误才会调用 _reportError。
+                  await Future<void>.delayed(Duration.zero);
+                  throw StateError('异步回调错误示例');
+                },
+                child: const Text('Future 未捕获异常（PlatformDispatcher）'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Timer 回调异常由当前 isolate 的 VM 错误端口收到。
+                  Timer.run(() => throw StateError('Timer 错误示例'));
+                },
+                child: const Text('触发 Isolate.current 监听（Timer）'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  try {
+                    throw StateError('已捕获的异常示例');
+                  } catch (error, stackTrace) {
+                    // try/catch 捕获的异常需主动上报。
+                    _reportError(error, stackTrace);
+                  }
+                },
+                child: const Text('触发并上报已捕获异常'),
+              ),
+              ElevatedButton(
+                onPressed: () => unawaited(_startChildIsolateErrorDemo()),
+                child: const Text('触发子 isolate 错误'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+
 /*
-*release环境flutter会崩溃吗？ 如果没有native插件相关的报错的话，
-* 只是flutter framework层和isolate底层的异常的话，比如framework层的空指针
-* ，类型错误等， 我指的是抛开使用到flutter插件中natvie层发生的崩溃
-*
-* release 环境下 Flutter 应用如果没有涉及 native 插件相关的崩溃，
-* 且崩溃仅来自 Flutter framework 层（Dart 层）或 isolate 层的异常，比如空指针、类型错误等，
-* 通常 不会导致进程直接崩溃（crash），而是会表现为异常抛出、应用逻辑错误或 UI 不正常，但进程仍然存活。
 
-  详细说明：
-  1、Dart 层异常的表现
+1、上报未捕获异常： FlutterError.onError ，  自动捕获 Flutter 框架中抛出的所有“致命”错误
 
-  Flutter framework 层（如空指针、类型错误等）抛出的异常会被 Dart VM 捕获，
-  默认会触发异常回调（如 FlutterError.onError）并打印错误信息。
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
 
-      如果没有被捕获，异常会沿调用栈向上传播，最终导致对应的 Future 或事件回调失败。
 
-      但这类异常不会直接导致 APP 进程崩溃（native crash），而是 Dart 层的异常机制处理。
+2、Flutter 框架不会捕获异步错误，要捕获这类错误，可以使用 PlatformDispatcher.instance.onError 处理器：
 
-  2、Isolate 层异常
+    // 将未被 Flutter 框架处理的未捕获异步错误交给 Crashlytics。
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
 
-  如果 isolate 内部异常未捕获，也不会导致整个 app 崩溃。
 
-      isolate 会自行终止，但主 isolate 继续运行。
+3、Flutter 上下文之外的错误： 要捕获 Flutter 上下文之外发生的错误，可以为当前 Isolate 注册错误监听器：
 
-      Dart isolate 是相互隔离的，单个 isolate 异常不会传递成 native 崩溃。
+    Isolate.current.addErrorListener(RawReceivePort((pair) async {
+      final List<dynamic> errorAndStacktrace = pair;
+      await FirebaseCrashlytics.instance.recordError(
+        errorAndStacktrace.first,
+        errorAndStacktrace.last,
+        fatal: true,
+      );
+    }).sendPort);
 
-  对比 native crash
 
-      native 层崩溃（如段错误 SIGSEGV、野指针访问等）才会导致 APP 进程崩溃并退出。
-
-      这通常发生在调用第三方插件 native 代码或底层系统调用时。
-* */
+ */
