@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 void main() {
-  runApp(GetMaterialApp(
-    home: const EntryPage(),
+  runApp(const GetMaterialApp(
+    home: EntryPage(),
     smartManagement: SmartManagement.full, // 确保自动回收
   ));
 }
