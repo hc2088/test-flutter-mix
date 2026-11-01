@@ -37,7 +37,7 @@ Element 只能在同一颗 Widget 树中复用
 
 
 
-
+  Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
       // 1、如果新 Widget 为 null，说明应该移除这个 child（也就是销毁）
     if (newWidget == null) {
 
@@ -53,16 +53,27 @@ Element 只能在同一颗 Widget 树中复用
       
     hasSameSuperclass 的目的
     
-                  static int _debugConcreteSubtype(Element element) {
-                return element is StatefulElement ? 1 :
-                       element is StatelessElement ? 2 :
-                       0;
-              }  static int _debugConcreteSubtype(Widget widget) {
-                return widget is StatefulWidget ? 1 :
-                       widget is StatelessWidget ? 2 :
-                       0;
-              }
-                   final int oldElementClass = Element._debugConcreteSubtype(child);
+    
+    
+    is 用来判断“对象”的“运行时类型”是否兼容指定类型：
+    如果实例本身是这个“类”，或者是它的“子类”，结果就是 true。
+     
+    所以这段代码依次判断：
+- element 是 StatefulElement 或其子类：返回 1
+- 否则，是 StatelessElement 或其子类：返回 2
+- 都不是：返回 0
+     static int _debugConcreteSubtype(Element element) {
+        return element is StatefulElement ? 1 :
+               element is StatelessElement ? 2 :
+               0;
+      }  
+      
+      static int _debugConcreteSubtype(Widget widget) {
+        return widget is StatefulWidget ? 1 :
+               widget is StatelessWidget ? 2 :
+               0;
+      }
+           final int oldElementClass = Element._debugConcreteSubtype(child);
                     final int newWidgetClass = Widget._debugConcreteSubtype(newWidget);
   
     hasSameSuperclass = oldElementClass == newWidgetClass;
@@ -87,11 +98,11 @@ Element 只能在同一颗 Widget 树中复用
       } 
       
       
-                 static bool canUpdate(Widget oldWidget, Widget newWidget) {
-                     return oldWidget.runtimeType == newWidget.runtimeType
-                    && oldWidget.key == newWidget.key;
-                 }
- 
+     static bool canUpdate(Widget oldWidget, Widget newWidget) {
+         return oldWidget.runtimeType == newWidget.runtimeType
+                 && oldWidget.key == newWidget.key;
+     }
+
       
          //3、 判断是否可以复用当前 child（Element）
             // 类型一致、key一致
@@ -112,9 +123,8 @@ Element 只能在同一颗 Widget 树中复用
            key不一致，
            类型不一致，
            或者key和类型都不一致，
-           或者类型一致（但是父类变了，stateless改成statefull，
-            我们hot reload时，把一个StatelessWidget改成了StateFullWidget，类名没有改，父类改了，
-            这时候runtimeType是相等的，但是应该被当作不同widget，所以不能仅用类名来判断）
+           或者类型一致（ 但是类型继承关系变了， 比如把statelesswidget改成statefullwidget，
+            runtimeType是相等的，但是应该被当作不同widget，所以不能仅用类型来判断）
 
         deactivateChild(child);
  
@@ -219,8 +229,7 @@ GlobalKey 不等于永久驻留内存，但如果你一直引用它，或者 Flu
 Element/State 就不会释放。
 所以正确管理 GlobalKey 的生命周期很重要，错误使用会造成内存泄漏。
  
-
-
+ 
 
 State：
 

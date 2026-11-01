@@ -231,6 +231,24 @@ class ErrorCaptureApp extends StatelessWidget {
               },
               child: const Text('MethodChannel Future 错误'),
             ),
+            ElevatedButton(
+              onPressed: () async {
+                // - 条件为 true：继续执行。
+                // - 条件为 false：抛出 AssertionError。
+                // - Flutter debug 模式默认启用断言；
+                // profile 和 release 模式默认关闭断言。
+                // 关闭时，assert 会被忽略，条件和提示信息都不会执行。
+
+                // 所以，debug 下断言失败确实会抛错，之后是否进入 runZonedGuarded、FlutterError.onError 等处理路径，
+                // 取决于它在哪里抛出、是否被捕获。
+
+                // release 下则不会因为这个 assert 抛错。
+                // assert 适合开发阶段检查程序假设，不适合做必须在 release 中生效的参数校验。
+                // 也不要在断言条件里放有副作用的代码，因为 release 下条件不会执行。
+                assert(false, 'assert');
+              },
+              child: const Text(' 断言 错误'),
+            ),
           ],
         ),
       ),

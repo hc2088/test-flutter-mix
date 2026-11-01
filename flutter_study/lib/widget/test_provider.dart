@@ -57,26 +57,26 @@ class _CounterDisplayState extends State<CounterDisplayFullwidget> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print("  initState");
+    print("_CounterDisplayState  initState");
   }
 
   @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    print("didChangeDependencies");
+    print("_CounterDisplayState didChangeDependencies");
   }
 
   @override
   void didUpdateWidget(covariant CounterDisplayFullwidget oldWidget) {
     // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
-    print("didUpdateWidget");
+    print("_CounterDisplayState didUpdateWidget");
   }
 
   @override
   Widget build(BuildContext context) {
-    print('CounterDisplay build');
+    print('_CounterDisplayState CounterDisplay build');
     final count = context.watch<CounterModel>().count;
     return Text('Counter: $count');
   }
@@ -89,7 +89,7 @@ class CounterDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     print('CounterDisplay build');
     final count = context.watch<CounterModel>().count;
-    return Text('Counter: $count');
+    return Text('CounterDisplay Counter: $count');
   }
 }
 
